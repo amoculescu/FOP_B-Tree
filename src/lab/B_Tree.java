@@ -1,8 +1,14 @@
 package lab;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import frame.*;
+
+import javax.swing.text.html.parser.Entity;
 
 /*
  * Implements a B-Tree structure as introduced in the 
@@ -18,6 +24,8 @@ import frame.*;
 
 public class B_Tree {
 
+    private int t;
+    private B_TreeNode root;
     /**
 	* The constructor
 	* 
@@ -30,7 +38,8 @@ public class B_Tree {
         /**
          * Add your code here
     	   */
-
+        this.t = t;
+        this.root = new B_TreeNode(t);
     }
 
     /**
@@ -51,7 +60,17 @@ public class B_Tree {
         /**
          * Add your code here
     	   */
-    	return 0;
+        int numberOfInsertions = 0;
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+            String currentLine;
+            while((currentLine = br.readLine()) != null){
+                Entry newEntry = new Entry(currentLine.substring(0, 5), currentLine.substring(6, 10), currentLine.substring(11));
+                if (insert(newEntry))
+                    numberOfInsertions++;
+            }
+        }catch (IOException e){ e.printStackTrace(); }
+    	return numberOfInsertions;
     }
     
     /**
@@ -71,7 +90,18 @@ public class B_Tree {
         /**
          * Add your code here
     	   */
-    	return true;
+        if(root.isEmpty()){
+            //empty
+            return true;
+        }
+        else if (root.full()){
+            //split
+            return false;
+        }
+        else{
+            //not full or empty
+            return true;
+        }
     }
     
     /**
@@ -111,9 +141,28 @@ public class B_Tree {
         /**
          * Add your code here
     	   */
-    	return new Entry();
+        if(root.isEmpty())
+            return null;
+        else{
+            int index = root.contains(searchKey);
+            if(index != -1)
+                return root.getEntry(index);
+            else
+                return findRecursive(root.getNode(searchKey), searchKey);
+        }
     }
-    
+
+
+    public Entry findRecursive(B_TreeNode node, String searchkey){
+        if(node != null) {
+            int entryIndex = node.contains(searchkey);
+            if (entryIndex != -1)
+                return node.getEntry(entryIndex);
+            else
+                return findRecursive(node.getNode(searchkey), searchkey);
+        } else
+            return null;
+    }
     /**
 	 * This method returns a ArrayList<String> containing the output B-Tree.
        * The output should be directly interpretable dot code.
