@@ -16,8 +16,9 @@ import java.util.ArrayList;
 public class B_TreeNode {
 
 	private int t;
-	ArrayList<Entry> keys;
-	ArrayList<B_TreeNode> children;
+	private B_TreeNode parent;
+	private ArrayList<Entry> keys;
+	private ArrayList<B_TreeNode> children;
 
     /**
 	* The constructor
@@ -50,12 +51,23 @@ public class B_TreeNode {
 	}
 
 
-	public int contains(String searchkey){
-		for (int i = 0; i < keys.size(); i++){
-			if (keys.get(i).getKey().compareTo(searchkey) == 0)
-				return i;
-		}
-		return -1;
+    /**
+     * locates the index of a key if it'S contained in the node
+     * if it isn't it locates the index of the child node to be searched next
+     * @param searchkey key that is searched for
+     * @return int, index of entry or node
+     */
+	public int getIndex(String searchkey){
+        int i = 0;
+        while (i < keys.size()){
+            if(keys.get(i).getKey().compareTo(searchkey) == 0)
+                return i;
+            if(keys.get(i).getKey().compareTo(searchkey) > 0)
+                return -i;
+            i++;
+
+        }
+        return -i;
 	}
 
 	/**
@@ -70,16 +82,22 @@ public class B_TreeNode {
 
 	/**
 	 * returns the node that might contain key that is being looked for
-	 * @param searchkey
-	 * @return
+	 * @param index
+	 * @return B_TreeNode
 	 */
-	public B_TreeNode getNode(String searchkey){
-		int i = 0;
-		while(i < keys.size() && keys.get(i).getKey().compareTo(searchkey) <= 0){
-			i++;
-		}
-		return children.get(i);
+	public B_TreeNode getNode(int index){
+		return children.get(index);
 	}
+
+	public void addEntry(Entry insertEntry, int index){
+	    if(index >= 0)
+	        keys.add(index, insertEntry);
+	    else
+	        keys.add(insertEntry);
+	}
+	public void addEntry(Entry insertEntry){
+	    addEntry(insertEntry, -1);
+    }
    /**
     * Add your code here
     */

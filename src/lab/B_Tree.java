@@ -1,14 +1,11 @@
 package lab;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import frame.*;
-
-import javax.swing.text.html.parser.Entity;
 
 /*
  * Implements a B-Tree structure as introduced in the 
@@ -76,7 +73,7 @@ public class B_Tree {
     /**
 	 * This method inserts the entry insertEntry into the B-Tree. Note that you
        * have to deal with overflows if you want to insert an entry into a leaf which
-       * already contains 2t - 1 entries. This method returns true if the insertion
+       * already getIndex 2t - 1 entries. This method returns true if the insertion
        * of the entry insertEntry is successful and false if the key of this entry
        * already exists in the B-Tree.
        *
@@ -92,18 +89,32 @@ public class B_Tree {
     	   */
         if(root.isEmpty()){
             //empty
+            root.addEntry(insertEntry);
             return true;
         }
-        else if (root.full()){
-            //split
-            return false;
+        else if(root.full()){
+            root = root.split();
+            return insertRecursive(root, insertEntry);
+        }
+        else
+            return insertRecursive(root, insertEntry);
+    }
+
+    public boolean insertRecursive(B_TreeNode node, Entry insertentry){
+        if(node.full()){
+            return insertRecursive(node.split(), insertentry);
+            //to be completed
         }
         else{
-            //not full or empty
-            return true;
+            int i = node.getIndex(insertentry.getKey());
+            if(i >= 0)
+                node.addEntry(insertentry, i);
+            else
+                insertRecursive(node.getNode(-i), insertentry);
         }
+        return true;
     }
-    
+
     /**
 	 * This method deletes the entry from the B-Tree structure, having deleteKey
        * as key. In this method you have to distinguish between two cases:
@@ -144,22 +155,22 @@ public class B_Tree {
         if(root.isEmpty())
             return null;
         else{
-            int index = root.contains(searchKey);
-            if(index != -1)
+            int index = root.getIndex(searchKey);
+            if(index >= 0)
                 return root.getEntry(index);
             else
-                return findRecursive(root.getNode(searchKey), searchKey);
+                return findRecursive(root.getNode(-index), searchKey);
         }
     }
 
 
     public Entry findRecursive(B_TreeNode node, String searchkey){
         if(node != null) {
-            int entryIndex = node.contains(searchkey);
-            if (entryIndex != -1)
-                return node.getEntry(entryIndex);
+            int index = node.getIndex(searchkey);
+            if (index >= 0)
+                return node.getEntry(index);
             else
-                return findRecursive(node.getNode(searchkey), searchkey);
+                return findRecursive(node.getNode(-index), searchkey);
         } else
             return null;
     }
@@ -197,7 +208,7 @@ public class B_Tree {
 
     /**
 	 * This method traverses the B-Tree in inorder and adds each entry to a
-       * ArrayList<Entry>. The returned ArrayList contains the entries of the B-Tree
+       * ArrayList<Entry>. The returned ArrayList getIndex the entries of the B-Tree
        * in ascending order.
        *
 	 * @return returns the entries stored in the B-Tree in ascending order
